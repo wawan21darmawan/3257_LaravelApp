@@ -19,7 +19,7 @@
         </a>
     </div>
 
-    <!-- Form Pencarian (Soal 3) -->
+    <!-- Form Pencarian -->
     <form action="{{ route('admin.partners.index') }}" method="GET" class="mb-6 flex gap-2">
         <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama partner..." 
             class="border border-slate-200 px-4 py-2 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none w-64">
@@ -28,14 +28,14 @@
         </button>
     </form>
 
-    <!-- Table (Soal 2) -->
+    <!-- Table -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
         <table class="w-full text-sm">
             <thead class="bg-slate-50 border-b border-slate-100">
                 <tr>
                     <th class="text-left px-6 py-4 font-bold text-slate-600">No</th>
                     <th class="text-left px-6 py-4 font-bold text-slate-600">Nama Partner</th>
-                    <th class="text-left px-6 py-4 font-bold text-slate-600">Logo URL</th>
+                    <th class="text-left px-6 py-4 font-bold text-slate-600">Logo</th>
                     <th class="text-left px-6 py-4 font-bold text-slate-600">Aksi</th>
                 </tr>
             </thead>
@@ -45,16 +45,30 @@
                 <tr class="hover:bg-slate-50 transition">
                     <td class="px-6 py-4 text-slate-400 font-semibold">{{ $index + 1 }}</td>
                     <td class="px-6 py-4 font-semibold text-slate-800">{{ $partner->name }}</td>
-                    <td class="px-6 py-4 text-slate-500 font-mono text-xs">{{ $partner->logo_url }}</td>
+                    
+                    <!-- Menampilkan Gambar (Logo) -->
+                    <td class="px-6 py-4">
+                        @if($partner->logo_url)
+                            <img src="{{ asset('storage/' . $partner->logo_url) }}" alt="{{ $partner->name }}" 
+                                 class="w-16 h-12 object-contain rounded-lg border border-slate-200">
+                        @else
+                            <span class="text-xs text-slate-400 italic">No image</span>
+                        @endif
+                    </td>
+
                     <td class="px-6 py-4">
                         <div class="flex gap-2">
-                            <a href="{{ route('admin.partners.edit', $partner->id) }}" class="px-3 py-1.5 bg-amber-50 text-amber-600 rounded-lg font-bold text-xs hover:bg-amber-100 transition">Edit</a>
+                            <!-- Tombol Edit -->
+                            <a href="{{ route('admin.partners.edit', $partner->id) }}" 
+                               class="px-3 py-1.5 bg-amber-50 text-amber-600 rounded-lg font-bold text-xs hover:bg-amber-100 transition">
+                                Edit
+                            </a>
                             
-                            <form action="{{ route('admin.partners.destroy', $partner->id) }}" method="POST">
+                            <!-- Tombol Hapus -->
+                            <form action="{{ route('admin.partners.destroy', $partner->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus partner ini?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" onclick="return confirm('Yakin hapus partner ini?')"
-                                    class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg font-bold text-xs hover:bg-red-100 transition">
+                                <button type="submit" class="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg font-bold text-xs hover:bg-red-100 transition">
                                     Hapus
                                 </button>
                             </form>

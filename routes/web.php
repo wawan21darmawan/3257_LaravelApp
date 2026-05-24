@@ -19,8 +19,8 @@ Route::get('/my-ticket', [EventController::class, 'ticket'])->name('ticket');
 Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::resource('events', EventAdminController::class);
-    // Ganti baris lama dengan ini (membuat semua route CRUD otomatis)
     Route::resource('categories', CategoryController::class);
+    Route::resource('partners', \App\Http\Controllers\Admin\PartnerController::class);
 });
 
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -31,3 +31,5 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::get('/admin/transactions', function () {
     return view('admin.transactions.index');
 })->name('admin.transactions.index');
+
+
