@@ -1,5 +1,4 @@
 @extends('layouts.admin')
-
 @section('title', 'Edit Partner')
 @section('page_title', 'Edit Partner')
 @section('page_subtitle', 'Ubah data partner event')

@@ -1,36 +1,58 @@
 <?php
-
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\EventController as EventAdminController;
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\TransactionController;
+use App\Http\Controllers\CheckoutController; // Pastikan ini di-import
+use App\Http\Controllers\MidtransWebhookController;
 
-// Route User Area
+Route::post('/midtrans/callback', [MidtransWebhookController::class, 'handle']);
+
+// ==========================================
+// ROUTE USER AREA (Akses Publik)
+// ==========================================
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/event', [EventController::class, 'show'])->name('events.show');
-Route::get('/checkout', [EventController::class, 'checkout'])->name('checkout');
-Route::post('/checkout', [EventController::class, 'processCheckout'])->name('checkout.process');
+Route::get('/event/{event}', [EventController::class, 'show'])->name('events.show');
+
+// Area Route Checkout Publik
+Route::get('/checkout/{event}', [CheckoutController::class, 'create'])->name('checkout.create');
+Route::post('/checkout/{event}', [CheckoutController::class, 'store'])->name('checkout.store');
+
+// ---> PINDAHKAN RUTE PAYMENT & SUCCESS KE SINI <---
+Route::get('/checkout/payment/{order_id}', [CheckoutController::class, 'payment'])->name('checkout.payment');
+Route::get('/checkout/success/{order_id}', [CheckoutController::class, 'success'])->name('checkout.success');
+
 Route::get('/my-ticket', [EventController::class, 'ticket'])->name('ticket');
 
-// Route Admin Area
+// Redirect /login utama ke login admin
+Route::get('/login', function () {
+    return redirect()->route('admin.login');
+})->name('login');
 
-Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
-    Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
-    Route::resource('events', EventAdminController::class);
-    Route::resource('categories', CategoryController::class);
-    Route::resource('partners', \App\Http\Controllers\Admin\PartnerController::class);
-});
 
+// ==========================================
+// ROUTE ADMIN AREA (Wajib Login)
+// ==========================================
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('events', EventAdminController::class);
+    
+    // Rute Login bebas akses
+    Route::get('login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('login', [AuthController::class, 'login'])->name('login.post');
+    Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+    
+    // Mengamankan Route Administrasi di balik tembok (Middleware)
+    Route::middleware(['auth', 'admin'])->group(function () {
+        
+        Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+        Route::resource('events', EventAdminController::class); 
+        Route::resource('categories', CategoryController::class);
+        Route::resource('partners', \App\Http\Controllers\Admin\PartnerController::class);
+
+        Route::get('transactions', [TransactionController::class, 'index'])->name('transactions.index');
+        Route::post('/midtrans/callback', [\App\Http\Controllers\MidtransWebhookController::class, 'handle']);
+    });
 });
-
-// Route admin/trancation/index
-Route::get('/admin/transactions', function () {
-    return view('admin.transactions.index');
-})->name('admin.transactions.index');
-
-
-

@@ -1,9 +1,7 @@
 @extends('layouts.admin')
-
 @section('title', 'Manajemen Partner')
 @section('page_title', 'Manajemen Partner')
 @section('page_subtitle', 'Kelola partner event yang tersedia')
-
 @section('content')
 <div class="p-6 w-full">
 
