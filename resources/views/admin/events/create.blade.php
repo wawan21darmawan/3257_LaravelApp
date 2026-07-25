@@ -1,13 +1,14 @@
 @extends('layouts.admin')
 
-@section('title', 'Tambah Event Baru - Admin')
+@section('title', 'Tambah Event Baru - Organizer')
 @section('page_title', 'Tambah Event Baru')
-@section('page_subtitle', 'Masukkan detail acara baru.')
+@section('page_subtitle', 'Masukkan detail acara baru organisasimu.')
 
 @section('content')
     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm max-w-3xl">
 
-        <form action="{{ route('admin.events.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
+        <!-- UBAH DISINI: admin.events.store menjadi organizer.events.store -->
+        <form action="{{ route('organizer.events.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
 
             <!-- Judul -->
@@ -71,7 +72,8 @@
             </div>
 
             <div class="flex justify-between items-center pt-4">
-                <a href="{{ route('admin.events.index') }}"
+                <!-- UBAH DISINI: admin.events.index menjadi organizer.events.index -->
+                <a href="{{ route('organizer.events.index') }}"
                     class="px-6 py-3 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition">
                     Batal
                 </a>

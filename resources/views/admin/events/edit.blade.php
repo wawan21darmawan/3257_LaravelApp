@@ -1,13 +1,14 @@
 @extends('layouts.admin')
 
-@section('title', 'Edit Event - Admin')
+@section('title', 'Edit Event - Organizer')
 @section('page_title', 'Edit Event')
-@section('page_subtitle', 'Ubah detail acara.')
+@section('page_subtitle', 'Ubah detail acara organisasimu.')
 
 @section('content')
     <div class="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm max-w-3xl">
 
-        <form action="{{ route('admin.events.update', $event->id) }}" method="POST" enctype="multipart/form-data"
+        <!-- UBAH DISINI: admin.events.update menjadi organizer.events.update -->
+        <form action="{{ route('organizer.events.update', $event->id) }}" method="POST" enctype="multipart/form-data"
             class="space-y-6">
             @csrf
             @method('PUT')
@@ -107,7 +108,8 @@
 
             <!-- Tombol -->
             <div class="flex justify-between items-center pt-4">
-                <a href="{{ route('admin.events.index') }}"
+                <!-- UBAH DISINI: admin.events.index menjadi organizer.events.index -->
+                <a href="{{ route('organizer.events.index') }}"
                     class="px-6 py-3 bg-red-100 text-red-600 rounded-xl hover:bg-red-200 transition">
                     Batal
                 </a>

@@ -48,32 +48,38 @@
 
     </div>
 
-    <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-6 flex flex-wrap gap-4 items-center justify-between">
+    <!-- ===== BUNGKUSAN FILTER DIUBAH MENJADI FORM ===== -->
+    <form method="GET" action="{{ url()->current() }}" class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm mb-6 flex flex-wrap gap-4 items-center justify-between">
         <div class="flex flex-wrap gap-3 w-full md:w-auto flex-1">
-            <input type="text" placeholder="Search order / nama / email..." class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 w-full md:w-64">
             
-            <select class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500 text-slate-600">
-                <option>Semua Event</option>
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Search order / nama / email..." class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 w-full md:w-64">
+            
+            <select name="event_id" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500 text-slate-600">
+                <option value="">Semua Event</option>
+                <!-- Nanti ditambahkan looping data events di sini jika diperlukan -->
             </select>
             
-            <select class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500 text-slate-600">
-                <option>Semua Status</option>
-                <option>Success</option>
-                <option>Pending</option>
+            <select name="status" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-4 py-2.5 focus:outline-none focus:border-indigo-500 text-slate-600">
+                <option value="">Semua Status</option>
+                <option value="success" {{ request('status') == 'success' ? 'selected' : '' }}>Success</option>
+                <option value="settlement" {{ request('status') == 'settlement' ? 'selected' : '' }}>Settlement</option>
+                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                <option value="failed" {{ request('status') == 'failed' ? 'selected' : '' }}>Failed</option>
             </select>
 
-            <input type="date" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-4 py-2.5 text-slate-500 focus:outline-none focus:border-indigo-500">
+            <input type="date" name="date" value="{{ request('date') }}" class="bg-slate-50 border border-slate-200 text-sm rounded-xl px-4 py-2.5 text-slate-500 focus:outline-none focus:border-indigo-500">
         </div>
         
         <div class="flex gap-2 w-full md:w-auto">
-            <button class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold py-2.5 px-6 rounded-xl transition shadow-sm">
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold py-2.5 px-6 rounded-xl transition shadow-sm">
                 Cari
             </button>
-            <button class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 text-sm font-bold py-2.5 px-6 rounded-xl transition">
+            <a href="{{ url()->current() }}" class="inline-block bg-white border border-slate-200 hover:bg-slate-50 text-slate-600 text-sm font-bold py-2.5 px-6 rounded-xl transition text-center">
                 Reset
-            </button>
+            </a>
         </div>
-    </div>
+    </form>
+    <!-- ===== AKHIR FORM FILTER ===== -->
 
     <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-slate-100">
         <div class="overflow-x-auto">
@@ -140,7 +146,8 @@
         </div>
 
         <div class="px-8 py-4 bg-slate-50/50 border-t border-slate-100">
-            {{ $transactions->links() }}
+            <!-- PENTING: Tambahan appends agar filter tidak hilang saat pindah halaman -->
+            {{ $transactions->appends(request()->query())->links() }}
         </div>
     </div>
 </div>

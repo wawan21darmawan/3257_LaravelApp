@@ -9,7 +9,7 @@ class AuthController extends Controller
 {
     // 1. Fungsi menampilkan halaman view formulir
     public function showLogin() {
-        return view('auth.login');
+        return view('admin.login');
     }
 
     // 2. Fungsi memproses validasi Submit Log In
@@ -21,7 +21,19 @@ class AuthController extends Controller
 
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            return redirect()->route('admin.dashboard'); // Arahkan ke rute dashboard
+            
+            // Ambil data user yang sedang login
+            $user = Auth::user();
+
+            // Cek role dan arahkan ke dashboard yang sesuai
+            if ($user->role === 'superadmin') {
+                return redirect()->route('admin.dashboard');
+            } elseif ($user->role === 'organizer') {
+                return redirect()->route('organizer.dashboard');
+            }
+
+            Auth::logout();
+        return back()->withErrors(['email' => 'Role tidak dikenali sistem.']);
         }
 
         return back()->withErrors([

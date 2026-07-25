@@ -39,7 +39,9 @@ class CheckoutController extends Controller
         }
 
         $orderId = 'TRX-' . time() . '-' . Str::random(5);
-        $totalPrice = $event->price + 5000;
+        
+        // Cek harga: Jika berbayar tambah admin 5000, jika gratis tetap 0
+        $totalPrice = $event->price > 0 ? $event->price + 5000 : 0;
 
         $transaction = Transaction::create([
             'event_id' => $event->id,
@@ -51,6 +53,32 @@ class CheckoutController extends Controller
             'status' => 'Pending',
         ]);
 
+        // ==========================================
+        // LOGIKA BYPASS UNTUK EVENT GRATIS
+        // ==========================================
+        if ($totalPrice == 0) {
+            // Langsung ubah status jadi sukses
+            $transaction->update(['status' => 'success']);
+            
+            // Kurangi stok
+            $event->decrement('stock');
+            
+            // Kirim Email E-Ticket
+            try {
+                Mail::to($transaction->customer_email)
+                    ->send(new EventTicketMail($transaction));
+            } catch (\Exception $e) {
+                Log::error('Gagal mengirim email E-Ticket (Event Gratis): ' . $e->getMessage());
+            }
+
+            // Arahkan langsung ke halaman sukses (Lompati Midtrans)
+            return redirect()->action([CheckoutController::class, 'success'], ['order_id' => $transaction->order_id])
+                             ->with('success', 'Pendaftaran event gratis berhasil!');
+        }
+
+        // ==========================================
+        // LOGIKA STANDAR UNTUK EVENT BERBAYAR (MIDTRANS)
+        // ==========================================
         \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
         \Midtrans\Config::$isProduction = false;
         \Midtrans\Config::$isSanitized = true;
@@ -84,14 +112,22 @@ class CheckoutController extends Controller
 
         $transaction = Transaction::with('event')->where('order_id', $order_id)->firstOrFail();
         
-        // Konfigurasi Midtrans untuk mengecek status transaksi langsung ke API
+        // ==========================================
+        // PENCEGAHAN ERROR API MIDTRANS UNTUK EVENT GRATIS
+        // ==========================================
+        // Jika total harga 0, langsung tampilkan halaman sukses tanpa memanggil API Midtrans
+        if ($transaction->total_price == 0) {
+            return view('checkout.success', compact('transaction', 'categories'));
+        }
+
+        // Konfigurasi Midtrans untuk mengecek status transaksi langsung ke API (Untuk event berbayar)
         \Midtrans\Config::$serverKey = env('MIDTRANS_SERVER_KEY');
         \Midtrans\Config::$isProduction = false;
         \Midtrans\Config::$isSanitized = true;
         \Midtrans\Config::$is3ds = true;
 
         try {
-            // Mengecek status pesanan secara mandiri (Bypass)
+            // Mengecek status pesanan secara mandiri
             $status = \Midtrans\Transaction::status($order_id);
             
             if ($status) {
@@ -112,7 +148,7 @@ class CheckoutController extends Controller
                                 Mail::to($transaction->customer_email)
                                     ->send(new EventTicketMail($transaction));
                             } catch (\Exception $e) {
-                                Log::error('Gagal mengirim email E-Ticket secara manual (Bypass): ' . $e->getMessage());
+                                Log::error('Gagal mengirim email E-Ticket secara manual: ' . $e->getMessage());
                             }
                         }
                     }
